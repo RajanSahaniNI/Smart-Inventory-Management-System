@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}AI Demand Forecast{% endblock %}
+
+{% block content %}
+<div class="header-section fade-in">
+    <div>
+        <h2 class="page-title">AI Demand Forecast <span class="badge badge-ai">Linear Regression</span></h2>
+        <p class="subtitle">Predicting next month's demand for: <strong>{{ product.name }}</strong></p>
+    </div>
+    <a href="{{ url_for('product_bp.index') }}" class="btn-secondary">← Back to Dashboard</a>
+</div>
+
+<div class="forecast-grid">
+    <div class="glass-card stat-card fade-in delay-1">
+        <div class="stat-icon">📈</div>
+        <div class="stat-content">
+            <h3>Forecasted Demand</h3>
+            <div class="stat-value">{{ prediction }} <span class="stat-unit">Units</span></div>
+            <p class="stat-desc">For next month (based on historical correlation)</p>
+        </div>
+    </div>
+    
+    <div class="glass-card stat-card fade-in delay-2">
+        <div class="stat-icon">📦</div>
+        <div class="stat-content">
+            <h3>Current Inventory</h3>
+            <div class="stat-value {{ 'danger-text' if product.quantity < prediction else 'success-text' }}">
+                {{ product.quantity }} <span class="stat-unit">Units</span>
+            </div>
+            <p class="stat-desc">
+                {% if product.quantity < prediction %}
+                ⚠️ Reorder strongly recommended to prevent stockouts!
+                {% else %}
+                ✅ Sufficient stock for forecasted demand.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card chart-card fade-in delay-3">
+    <h3>Sales History & Prediction Curve</h3>
+    <div class="chart-container" style="height: 400px; width: 100%;">
+        <canvas id="forecastChart"></canvas>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('forecastChart').getContext('2d');
+        const chartData = {{ chart_data | tojson | safe }};
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [
+                    {
+                        label: 'Actual Sales',
+                        data: chartData.actual,
+                        borderColor: '#84dcc6',
+                        backgroundColor: 'rgba(132, 220, 198, 0.15)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#84dcc6',
+                        pointBorderColor: '#334155',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Linear Regression Trend',
+                        data: chartData.predicted,
+                        borderColor: '#ff686b',
+                        borderDash: [5, 5],
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false
+                    },
+                    {
+                        label: 'Next Month Forecast',
+                        data: chartData.predicted.map((val, i) => i === chartData.predicted.length - 1 ? val : null),
+                        borderColor: '#ffa69e',
+                        backgroundColor: '#ffa69e',
+                        pointBackgroundColor: '#ffa69e',
+                        pointRadius: 8,
+                        pointHoverRadius: 10,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        showLine: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        labels: { color: '#e2e8f0', font: { family: "'Inter', sans-serif", size: 13 } }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        titleFont: { family: "'Inter', sans-serif", size: 14 },
+                        bodyFont: { family: "'Inter', sans-serif", size: 13 },
+                        padding: 12,
+                        cornerRadius: 8,
+                        displayColors: true
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
+                        ticks: { color: '#94a3b8', font: { family: "'Inter', sans-serif" } }
+                    },
+                    x: {
+                        grid: { display: false, drawBorder: false },
+                        ticks: { color: '#94a3b8', font: { family: "'Inter', sans-serif" } }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
