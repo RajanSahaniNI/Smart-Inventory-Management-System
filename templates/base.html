@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartInMS - {% block title %}{% endblock %}</title>
+  <!-- Use Google Fonts (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <div class="app-background"></div>
+  <nav class="glass-nav">
+    <div class="nav-container">
+      <h1 class="logo"><a href="{{ url_for('product_bp.index') }}">INVENTORA</a></h1>
+      <ul class="nav-links">
+        {% if request.endpoint in ['auth_bp.login', 'auth_bp.signup'] %}
+        <li><a href="{{ url_for('product_bp.contact') }}">Contact</a></li>
+        {% elif session.get('user_id') %}
+        <li><span style="color: var(--pearl-aqua); font-weight:700;">// {{ session.get('username') | upper }}</span>
+        </li>
+        <li><a href="{{ url_for('product_bp.index') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('product_bp.low_stock') }}" style="position: relative;">
+            Alerts
+            {% if global_low_stock > 0 %}
+            <span style="background: var(--danger); color: white; border-radius: 10px; padding: 2px 6px; font-size: 0.7rem; position: absolute; top: -8px; right: -20px; font-weight: bold; box-shadow: 0 0 5px var(--danger);">{{ global_low_stock }}</span>
+            {% endif %}
+        </a></li>
+        <li><a href="{{ url_for('product_bp.add') }}">Add Product</a></li>
+        <li><a href="{{ url_for('product_bp.contact') }}">Contact</a></li>
+        <li><a href="{{ url_for('auth_bp.logout') }}">Log Out</a></li>
+        {% else %}
+        <li><a href="{{ url_for('product_bp.contact') }}">Contact</a></li>
+        <li><a href="{{ url_for('auth_bp.login') }}">Login</a></li>
+        <li><a href="{{ url_for('auth_bp.signup') }}">Sign Up</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+  <div class="container main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="alerts-container">
+      {% for category, message in messages %}
+      <div class="alert alert-{{ category }} slide-down">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+  {% block scripts %}
+  <script>
+    setTimeout(function () {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        alert.style.transition = 'opacity 0.5s ease';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+      });
+    }, 3000);
+  </script>
+  {% endblock %}
+</body>
+
+</html>
