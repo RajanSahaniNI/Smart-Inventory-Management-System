@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="glass-card form-card fade-in" style="max-width: 400px; margin: 40px auto; text-align: center;">
+    <h2 style="color: var(--pearl-aqua); margin-bottom: 24px; 
+    text-shadow: 0 0 10px rgba(132, 220, 198, 0.4);">LOGIN
+    </h2>
+
+    <form action="{{ url_for('auth_bp.login') }}" method="POST" class="styled-form text-left" style="text-align: left;">
+        <div class="form-group slide-in delay-1">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" class="glass-input" required>
+        </div>
+
+        <div class="form-group slide-in delay-2">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" class="glass-input" required>
+        </div>
+
+        <div class="form-actions slide-in delay-3">
+            <button type="submit" class="btn-primary btn-large w-100">Go to Dashboard</button>
+        </div>
+    </form>
+
+    <p class="slide-in delay-4" style="margin-top: 24px; color: var(--text-muted);">
+        No access? <a href="{{ url_for('auth_bp.signup') }}"
+            style="color: var(--grapefruit-pink); text-decoration: underline;">Sign Up</a>
+    </p>
+</div>
+{% endblock %}
