@@ -24,20 +24,20 @@
 <!--Dashboard Cards -->
 <div class="analytics-grid fade-in delay-1">
     <div class="glass-card stat-card" style="flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px;">
-        <div style="display:flex; justify-content: space-between; width: 100%; color: var(--text-main); font-weight: 600;">
-            Total Products <span style="opacity: 0.5;">📦</span>
+        <div style="display:flex; justify-content: space-between; align-items: center; width: 100%; color: var(--text-main); font-weight: 600;">
+            Total Products <span style="opacity: 0.5; font-size: 1.8rem;">📦</span>
         </div>
         <div class="stat-value" style="font-size: 2.2rem; font-weight: 700;">{{ total_products }}</div>
     </div>
     <div class="glass-card stat-card" style="flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px;">
-        <div style="display:flex; justify-content: space-between; width: 100%; color: var(--text-main); font-weight: 600;">
-            Inventory Value <span style="opacity: 0.5;">💲</span>
+        <div style="display:flex; justify-content: space-between; align-items: center; width: 100%; color: var(--text-main); font-weight: 600;">
+            Inventory Value <span style="opacity: 0.5; font-size: 1.8rem;">₹</span>
         </div>
         <div class="stat-value" style="font-size: 2.2rem; font-weight: 700;">₹{{ "{:,.2f}".format(total_value) }}</div>
     </div>
     <div class="glass-card stat-card" style="flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px;">
-        <div style="display:flex; justify-content: space-between; width: 100%; color: var(--text-main); font-weight: 600;">
-            Low Stock Alerts <span class="danger-text">🚨</span>
+        <div style="display:flex; justify-content: space-between; align-items: center; width: 100%; color: var(--text-main); font-weight: 600;">
+            Low Stock Alerts <span class="danger-text" style="font-size: 1.8rem;">🚨</span>
         </div>
         <div class="stat-value danger-text" style="font-size: 2.2rem; font-weight: 700;">{{ low_stock_count }}</div>
     </div>

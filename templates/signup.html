@@ -2,19 +2,32 @@
 {% block title %}Sign Up{% endblock %}
 
 {% block content %}
-<style>
-    .app-background {
-        background-image: url('{{ url_for("static", filename="images/inventory_bg.jpeg") }}');
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        opacity: 0.8; /* Slight transparency so glass effect stays cohesive */
-    }
-    .app-background::before, .app-background::after {
-        display: none; /* Hide the background abstract shapes on auth pages */
-    }
-</style>
-<div class="glass-card form-card fade-in" style="max-width: 400px; margin: 40px auto; text-align: center;">
+
+<div class="glass-card form-card transparent-auth-card fade-in" style="max-width: 350px; margin: 40px auto; text-align: center;">
+    <div class="character-container slide-in" style="text-align: center; margin-bottom: 10px;">
+        <svg id="animated-character" width="80" height="80" viewBox="0 -10 120 130" style="overflow: visible;">
+            <style>
+                .pupil {
+                    transition: transform 0.1s ease-out;
+                }
+            </style>
+            <!-- Box Body -->
+            <rect x="25" y="30" width="70" height="70" rx="15" fill="var(--grapefruit-pink)" stroke="#fff" stroke-width="4" />
+            <!-- Box Flaps -->
+            <path d="M 25 30 L 60 10 L 95 30" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round" />
+            <!-- Left Eye Background -->
+            <circle cx="45" cy="60" r="10" fill="white" />
+            <!-- Right Eye Background -->
+            <circle cx="75" cy="60" r="10" fill="white" />
+            <!-- Left Pupil -->
+            <circle class="pupil" id="pupil-left" cx="45" cy="60" r="5" fill="#333" />
+            <!-- Right Pupil -->
+            <circle class="pupil" id="pupil-right" cx="75" cy="60" r="5" fill="#333" />
+            <!-- Smile -->
+            <path id="smile" d="M 50 80 Q 60 90 70 80" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" />
+        </svg>
+    </div>
+
     <h2 style="color: var(--grapefruit-pink); margin-bottom: 24px; text-shadow: 0 0 10px rgba(255, 104, 107, 0.4);">
         Signup</h2>
 
@@ -37,4 +50,32 @@
             style="color: var(--pearl-aqua); text-decoration: underline;">Login Here</a>
     </p>
 </div>
+
+<script>
+    document.addEventListener('mousemove', (e) => {
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+        
+        const svg = document.getElementById('animated-character');
+        if (!svg) return;
+        
+        const rect = svg.getBoundingClientRect();
+        // center of the svg
+        const svgX = rect.left + rect.width / 2;
+        const svgY = rect.top + rect.height / 2;
+        
+        // Calculate angle and distance
+        const dx = mouseX - svgX;
+        const dy = mouseY - svgY;
+        const angle = Math.atan2(dy, dx);
+        
+        // Limit the pupil movement distance (e.g., max 4px inside the eye)
+        const maxDist = 4;
+        const pupilX = Math.cos(angle) * maxDist;
+        const pupilY = Math.sin(angle) * maxDist;
+        
+        document.getElementById('pupil-left').style.transform = `translate(${pupilX}px, ${pupilY}px)`;
+        document.getElementById('pupil-right').style.transform = `translate(${pupilX}px, ${pupilY}px)`;
+    });
+</script>
 {% endblock %}
