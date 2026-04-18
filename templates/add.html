@@ -7,34 +7,30 @@
         <h2>Add New Product</h2>
         <a href="{{ url_for('product_bp.index') }}" class="btn-text">← Back to Dashboard</a>
     </div>
-    
     <form action="{{ url_for('product_bp.add') }}" method="POST" class="styled-form">
         <div class="form-group slide-in delay-1">
             <label for="name">Product Name</label>
             <input type="text" id="name" name="name" class="glass-input" required>
         </div>
-        
         <div class="form-group slide-in delay-2">
             <label for="category">Category</label>
             <input type="text" id="category" name="category" class="glass-input" required>
         </div>
-        
         <div class="form-row slide-in delay-3">
             <div class="form-group col-half">
                 <label for="quantity">Quantity</label>
                 <input type="number" id="quantity" name="quantity" class="glass-input" min="0" required>
             </div>
             <div class="form-group col-half">
-                <label for="price">Price ($)</label>
+                <label for="price">Price (₹)</label>
                 <input type="number" step="0.01" id="price" name="price" class="glass-input" min="0" required>
             </div>
         </div>
-        
         <div class="form-group slide-in delay-4">
             <label for="description">Description</label>
             <textarea id="description" name="description" class="glass-input" rows="4"></textarea>
         </div>
-        
+    
         <div class="form-actions slide-in delay-5">
             <button type="submit" class="btn-primary btn-large w-100">Save Product</button>
         </div>

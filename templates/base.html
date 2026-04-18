@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SmartInMS - {% block title %}{% endblock %}</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Use Google Fonts (Inter) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,50 +13,175 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
+  <script>
+    // Day/Night mode toggling logic
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
   <div class="app-background"></div>
-  <nav class="glass-nav">
-    <div class="nav-container">
-      <h1 class="logo"><a href="{{ url_for('product_bp.index') }}">INVENTORA</a></h1>
-      <ul class="nav-links">
-        {% if request.endpoint in ['auth_bp.login', 'auth_bp.signup'] %}
-        <li><a href="{{ url_for('product_bp.contact') }}">Contact</a></li>
-        {% elif session.get('user_id') %}
-        <li><span style="color: var(--pearl-aqua); font-weight:700;">// {{ session.get('username') | upper }}</span>
+  {% set is_auth_page = request.endpoint in ['auth_bp.login', 'auth_bp.signup'] %}
+
+  <div class="{% if is_auth_page %}d-flex flex-column min-vh-100{% else %}app-layout{% endif %}">
+    
+    {% if not is_auth_page %}
+    <!-- Full Layout WITH Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <a href="{{ url_for('product_bp.index') }}" style="display: flex; align-items: center; color: var(--text-main); text-decoration: none;">
+          <svg style="width: 24px; height: 24px; color: var(--primary); margin-right: 8px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          INVENTORA
+        </a>
+      </div>
+      <ul class="sidebar-links" style="padding-left: 0;">
+        {% if session.get('user_id') %}
+        <li>
+          <a href="{{ url_for('product_bp.index') }}" class="{% if request.endpoint == 'product_bp.index' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            Dashboard
+          </a>
         </li>
-        <li><a href="{{ url_for('product_bp.index') }}">Dashboard</a></li>
-        <li><a href="{{ url_for('product_bp.low_stock') }}" style="position: relative;">
+        <li>
+          <a href="{{ url_for('product_bp.add') }}" class="{% if request.endpoint == 'product_bp.add' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            Inventory
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('product_bp.low_stock') }}" class="{% if request.endpoint == 'product_bp.low_stock' %}active{% endif %}" style="position: relative;">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
             Alerts
-            {% if global_low_stock > 0 %}
-            <span style="background: var(--danger); color: white; border-radius: 10px; padding: 2px 6px; font-size: 0.7rem; position: absolute; top: -8px; right: -20px; font-weight: bold; box-shadow: 0 0 5px var(--danger);">{{ global_low_stock }}</span>
+            {% if global_low_stock and global_low_stock > 0 %}
+            <span class="sidebar-badge">{{ global_low_stock }}</span>
             {% endif %}
-        </a></li>
-        <li><a href="{{ url_for('product_bp.add') }}">Add Product</a></li>
-        <li><a href="{{ url_for('product_bp.contact') }}">Contact</a></li>
-        <li><a href="{{ url_for('auth_bp.logout') }}">Log Out</a></li>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('product_bp.contact') }}" class="{% if request.endpoint == 'product_bp.contact' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            Contacts
+          </a>
+        </li>
+        <li style="margin-top: auto;">
+          <a href="{{ url_for('auth_bp.logout') }}" style="color: var(--text-muted);">
+            Log Out
+          </a>
+        </li>
         {% else %}
-        <li><a href="{{ url_for('product_bp.contact') }}">Contact</a></li>
-        <li><a href="{{ url_for('auth_bp.login') }}">Login</a></li>
-        <li><a href="{{ url_for('auth_bp.signup') }}">Sign Up</a></li>
+        <li><a href="{{ url_for('auth_bp.login') }}" class="{% if request.endpoint == 'auth_bp.login' %}active{% endif %}">Login</a></li>
+        <li><a href="{{ url_for('auth_bp.signup') }}" class="{% if request.endpoint == 'auth_bp.signup' %}active{% endif %}">Sign Up</a></li>
+        <li><a href="{{ url_for('product_bp.contact') }}" class="{% if request.endpoint == 'product_bp.contact' %}active{% endif %}">Contact</a></li>
         {% endif %}
       </ul>
-    </div>
-  </nav>
-  <div class="container main-content">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="alerts-container">
-      {% for category, message in messages %}
-      <div class="alert alert-{{ category }} slide-down">{{ message }}</div>
-      {% endfor %}
+    </aside>
+    {% endif %}
+
+    {% if not is_auth_page %}
+    <div class="main-content d-flex flex-column" style="min-height: 100vh;">
+    {% endif %}
+
+      <header class="{% if is_auth_page %}d-flex align-items-center justify-content-between px-4 py-3 border-bottom{% else %}top-bar{% endif %}" {% if is_auth_page %}style="background: var(--surface-color); border-bottom-color: var(--glass-border)!important; position: sticky; top: 0; z-index: 100;"{% endif %}>
+        {% if is_auth_page %}
+          <div class="logo">
+            <a href="{{ url_for('product_bp.index') }}" style="display: flex; align-items: center; color: var(--text-main); font-weight: 700; font-size: 1.25rem; text-decoration: none;">
+              <svg style="width: 24px; height: 24px; color: var(--primary); margin-right: 8px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+              INVENTORA
+            </a>
+          </div>
+        {% else %}
+          <div class="top-bar-left"></div>
+        {% endif %}
+          <div class="top-bar-right">
+            <button id="themeToggleBtn" class="theme-toggle-btn" title="Toggle Theme">
+              <svg id="themeIconSun" class="theme-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+              <svg id="themeIconMoon" class="theme-icon" style="display:none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
+          </div>
+      </header>
+      
+      <main class="{% if is_auth_page %}container content-area flex-grow-1 py-5 d-flex flex-column justify-content-center align-items-center{% else %}container content-area flex-grow-1{% endif %}" {% if not is_auth_page %}style="padding-bottom: 2rem;"{% endif %}>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="alerts-container w-100">
+          {% for category, message in messages %}
+          <div class="alert alert-{{ category }} slide-down">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        
+        <div class="w-100">
+          {% block content %}{% endblock %}
+        </div>
+      </main>
+
+      <footer class="mt-auto py-3 text-center w-100" style="background: var(--surface-color); color: var(--text-muted); border-top: 1px solid var(--glass-border); font-size: 0.9rem;">
+        <div class="container">
+          <span>&copy; 2026 INVENTORA. All rights reserved.</span>
+        </div>
+      </footer>
+
+    {% if not is_auth_page %}
     </div>
     {% endif %}
-    {% endwith %}
-    {% block content %}{% endblock %}
   </div>
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   {% block scripts %}
   <script>
+    // Theme logic
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIconSun = document.getElementById('themeIconSun');
+    const themeIconMoon = document.getElementById('themeIconMoon');
+
+    function updateIcons(theme) {
+      if(!themeIconSun) return;
+      if (theme === 'dark') {
+        themeIconSun.style.display = 'none';
+        themeIconMoon.style.display = 'block';
+      } else {
+        themeIconSun.style.display = 'block';
+        themeIconMoon.style.display = 'none';
+      }
+    }
+
+    // Initial load
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    updateIcons(currentTheme);
+
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', () => {
+        let theme = document.documentElement.getAttribute('data-theme');
+        if (theme === 'dark') {
+          document.documentElement.removeAttribute('data-theme');
+          localStorage.setItem('theme', 'light');
+          updateIcons('light');
+          if (typeof Chart !== 'undefined') {
+              Chart.defaults.color = '#64748b';
+              Chart.defaults.borderColor = 'rgba(226, 232, 240, 0.4)';
+          }
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          localStorage.setItem('theme', 'dark');
+          updateIcons('dark');
+          if (typeof Chart !== 'undefined') {
+              Chart.defaults.color = '#94a3b8';
+              Chart.defaults.borderColor = 'rgba(148, 163, 184, 0.1)';
+          }
+        }
+        
+        // Attempt to re-render charts if they exist
+        if (window.myCharts) {
+          window.myCharts.forEach(c => c.update());
+        } else {
+           // trigger resize to adjust
+           window.dispatchEvent(new Event('resize'));
+        }
+      });
+    }
+
     setTimeout(function () {
       const alerts = document.querySelectorAll('.alert');
       alerts.forEach(alert => {
@@ -67,5 +193,4 @@
   </script>
   {% endblock %}
 </body>
-
 </html>

@@ -20,7 +20,7 @@
         <p style="margin-bottom: 10px;"><strong style="color: var(--text-muted); display: inline-block; width: 120px;">Code:</strong> #{{ product.id }}</p>
         <p style="margin-bottom: 10px;"><strong style="color: var(--text-muted); display: inline-block; width: 120px;">Name:</strong> {{ product.name }}</p>
         <p style="margin-bottom: 10px;"><strong style="color: var(--text-muted); display: inline-block; width: 120px;">Category:</strong> <span class="category-tag">{{ product.category }}</span></p>
-        <p style="margin-bottom: 10px;"><strong style="color: var(--text-muted); display: inline-block; width: 120px;">Price:</strong> <span class="price">${{ "{:,.2f}".format(product.price) }}</span></p>
+        <p style="margin-bottom: 10px;"><strong style="color: var(--text-muted); display: inline-block; width: 120px;">Price:</strong> <span class="price">₹{{ "{:,.2f}".format(product.price) }}</span></p>
         <p style="margin-bottom: 10px;"><strong style="color: var(--text-muted); display: inline-block; width: 120px;">Stock Left:</strong> 
             <span class="quantity-indicator" style="display: inline-flex;">
                 <span class="dot {% if product.quantity < 20 %}dot-danger{% elif product.quantity < 50 %}dot-warning{% else %}dot-success{% endif %}"></span>

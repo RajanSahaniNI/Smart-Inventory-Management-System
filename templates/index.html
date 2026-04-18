@@ -3,11 +3,11 @@
 {% block content %}
 <div class="header-section fade-in">
     <div>
-        <h2 class="page-title">Inventory Dashboard</h2>
-        <p class="subtitle">Overview and fast management of your inventory.</p>
+        <h2 class="page-title">Overview</h2>
     </div>
 
     <div class="header-actions">
+        <!-- Kept the Search inline form as well here, or exported button? I'll keep the export button as the user is used to it -->
         <a href="{{ url_for('product_bp.export_csv') }}" class="btn-secondary">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -23,117 +23,112 @@
 
 <!--Dashboard Cards -->
 <div class="analytics-grid fade-in delay-1">
-    <div class="glass-card stat-card">
-        <div class="stat-icon" style="color: var(--primary);">📦</div>
-        <div class="stat-content">
-            <h3>Total Inventory</h3>
-            <div class="stat-value">{{ total_products }}</div>
-            <p class="stat-desc">Products Cataloged</p>
+    <div class="glass-card stat-card" style="flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px;">
+        <div style="display:flex; justify-content: space-between; width: 100%; color: var(--text-main); font-weight: 600;">
+            Total Products <span style="opacity: 0.5;">📦</span>
         </div>
+        <div class="stat-value" style="font-size: 2.2rem; font-weight: 700;">{{ total_products }}</div>
     </div>
-    <div class="glass-card stat-card">
-        <div class="stat-icon" style="color: var(--golden-orange);">⚠️</div>
-        <div class="stat-content">
-            <h3>Low Stock Alerts</h3>
-            <div class="stat-value {% if low_stock_count > 0 %}warning-text{% endif %}">{{ low_stock_count }}</div>
-            <p class="stat-desc">Items below 20 units</p>
+    <div class="glass-card stat-card" style="flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px;">
+        <div style="display:flex; justify-content: space-between; width: 100%; color: var(--text-main); font-weight: 600;">
+            Inventory Value <span style="opacity: 0.5;">💲</span>
         </div>
+        <div class="stat-value" style="font-size: 2.2rem; font-weight: 700;">₹{{ "{:,.2f}".format(total_value) }}</div>
     </div>
-    <div class="glass-card stat-card">
-        <div class="stat-icon" style="color: var(--success);">💰</div>
-        <div class="stat-content">
-            <h3>Total Capital</h3>
-            <div class="stat-value">${{ "{:,.2f}".format(total_value) }}</div>
-            <p class="stat-desc">Asset value in stock</p>
+    <div class="glass-card stat-card" style="flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px;">
+        <div style="display:flex; justify-content: space-between; width: 100%; color: var(--text-main); font-weight: 600;">
+            Low Stock Alerts <span class="danger-text">🚨</span>
         </div>
+        <div class="stat-value danger-text" style="font-size: 2.2rem; font-weight: 700;">{{ low_stock_count }}</div>
     </div>
 </div>
 
-<!-- Dashboard Charts -->
-<div class="forecast-grid fade-in delay-2"
-    style="margin-bottom: 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-    <div class="glass-card chart-card" style="padding: 20px;">
-        <h3 style="margin-bottom: 16px; color: var(--text-main); font-size: 1.1rem;">Inventory Value by Category</h3>
-        <div style="height: 300px; position: relative;">
-            <canvas id="valueChart"></canvas>
+<!-- Content Grid mimicking the image layout -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-top: 2rem;">
+    
+    <!-- Left Column: Inventory List -->
+    <div class="glass-card fade-in delay-2" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h3 style="color: var(--text-main); font-size: 1.2rem;">Inventory Catalog</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">View and manage your products.</p>
+            </div>
+            
+            <form class="search-form" action="{{ url_for('product_bp.index') }}" method="GET" style="margin: 0;">
+                <div class="search-input-wrapper">
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" name="search" placeholder="Search products..." value="{{ search_query }}"
+                        class="glass-input" style="width: 220px; padding: 8px 12px 8px 36px; font-size: 0.9rem;">
+                </div>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="inventory-table">
+                <thead>
+                    <tr>
+                        <th><a href="?sort_by=name" class="sortable">Name <span class="sort-icon">⇅</span></a></th>
+                        <th><a href="?sort_by=category" class="sortable">Category <span class="sort-icon">⇅</span></a></th>
+                        <th><a href="?sort_by=quantity" class="sortable">Stock <span class="sort-icon">⇅</span></a></th>
+                        <th><a href="?sort_by=price" class="sortable">Price <span class="sort-icon">⇅</span></a></th>
+                        <th class="actions-col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr class="slide-in" style="animation-delay: {{ loop.index0 * 0.05 + 0.3 }}s">
+                        <td><a href="{{ url_for('product_bp.details', id=product.id) }}"><strong>{{ product.name }}</strong></a></td>
+                        <td><span class="category-tag">{{ product.category }}</span></td>
+                        <td style="font-weight: 600;">
+                            {% if product.quantity < 20 %}
+                            <span class="danger-text">{{ product.quantity }} in stock</span>
+                            {% else %}
+                            <span style="color: var(--text-main);">{{ product.quantity }} in stock</span>
+                            {% endif %}
+                        </td>
+                        <td class="price">₹{{ "{:,.2f}".format(product.price) }}</td>
+                        <td class="action-buttons">
+                            <a href="{{ url_for('product_bp.edit', id=product.id) }}" class="btn-icon" title="Edit">✎</a>
+                            <a href="{{ url_for('product_bp.predict', id=product.id) }}" class="btn-icon btn-ai"
+                                title="AI Demand Forecast">✨</a>
+                            <form action="{{ url_for('product_bp.delete', id=product.id) }}" method="POST"
+                                style="display:inline;">
+                                <button type="submit" class="btn-icon btn-danger"
+                                    onclick="return confirm('Confirm deletion?')" title="Delete">🗑</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center empty-state" style="padding: 40px; text-align: center;">
+                            <div class="empty-icon" style="font-size: 2rem; color: var(--text-muted); opacity: 0.5;">📁</div>
+                            <p style="color: var(--text-muted);">No products found.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-    <div class="glass-card chart-card" style="padding: 20px;">
-        <h3 style="margin-bottom: 16px; color: var(--text-main); font-size: 1.1rem;">Stock Distribution</h3>
-        <div style="height: 300px; position: relative;">
-            <canvas id="stockChart"></canvas>
-        </div>
-    </div>
-</div>
 
-<div class="header-section fade-in delay-2" style="margin-top: 2rem;">
-    <form class="search-form" action="{{ url_for('product_bp.index') }}" method="GET">
-        <div class="search-input-wrapper">
-            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" name="search" placeholder="Search by precise name..." value="{{ search_query }}"
-                class="glass-input">
+    <!-- Right Column: Charts Stacked -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+        <div class="glass-card chart-card fade-in delay-3" style="padding: 24px; min-height: 300px;">
+            <h3 style="margin-bottom: 16px; color: var(--text-main); font-size: 1.1rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px;">Inventory Value</h3>
+            <div style="height: 220px; position: relative;">
+                <canvas id="valueChart"></canvas>
+            </div>
         </div>
-        <button type="submit" class="btn-secondary">Search</button>
-        {% if search_query %}
-        <a href="{{ url_for('product_bp.index') }}" class="btn-text">Clear</a>
-        {% endif %}
-    </form>
-</div>
-
-<div class="glass-card table-card fade-in delay-3">
-    <div class="table-responsive">
-        <table class="inventory-table">
-            <thead>
-                <tr>
-                    <th><a href="?sort_by=id" class="sortable">ID <span class="sort-icon">⇅</span></a></th>
-                    <th><a href="?sort_by=name" class="sortable">Name <span class="sort-icon">⇅</span></a></th>
-                    <th><a href="?sort_by=category" class="sortable">Category <span class="sort-icon">⇅</span></a></th>
-                    <th><a href="?sort_by=quantity" class="sortable">Quantity <span class="sort-icon">⇅</span></a></th>
-                    <th><a href="?sort_by=price" class="sortable">Price <span class="sort-icon">⇅</span></a></th>
-                    <th class="actions-col">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in products %}
-                <tr class="slide-in" style="animation-delay: {{ loop.index0 * 0.05 + 0.3 }}s">
-                    <td class="dim-text">#{{ product.id }}</td>
-                    <td><a href="{{ url_for('product_bp.details', id=product.id) }}"><strong>{{ product.name
-                                }}</strong></a></td>
-                    <td><span class="category-tag">{{ product.category }}</span></td>
-                    <td>
-                        <div class="quantity-indicator">
-                            <div
-                                class="dot {% if product.quantity < 20 %}dot-danger{% elif product.quantity < 50 %}dot-warning{% else %}dot-success{% endif %}">
-                            </div>
-                            {{ product.quantity }} Units
-                        </div>
-                    </td>
-                    <td class="price">${{ "{:,.2f}".format(product.price) }}</td>
-                    <td class="action-buttons">
-                        <a href="{{ url_for('product_bp.edit', id=product.id) }}" class="btn-icon" title="Edit">✎</a>
-                        <a href="{{ url_for('product_bp.predict', id=product.id) }}" class="btn-icon btn-ai"
-                            title="AI Demand Forecast">✨</a>
-                        <form action="{{ url_for('product_bp.delete', id=product.id) }}" method="POST"
-                            style="display:inline;">
-                            <button type="submit" class="btn-icon btn-danger"
-                                onclick="return confirm('Confirm deletion?')" title="Delete">🗑</button>
-                        </form>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="6" class="text-center empty-state">
-                        <div class="empty-icon">📁</div>
-                        <p>No products found in inventory.</p>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="glass-card chart-card fade-in delay-4" style="padding: 24px; min-height: 300px;">
+            <h3 style="margin-bottom: 16px; color: var(--text-main); font-size: 1.1rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px;">Stock Distribution</h3>
+            <div style="height: 220px; position: relative;">
+                <canvas id="stockChart"></canvas>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -164,7 +159,7 @@
         data: {
             labels: categoryLabels,
             datasets: [{
-                label: 'Total Value ($)',
+                label: 'Total Value (₹)',
                 data: categoryValues,
                 backgroundColor: 'rgba(17, 138, 178, 0.7)',
                 borderColor: '#118ab2',

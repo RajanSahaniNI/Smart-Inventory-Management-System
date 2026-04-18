@@ -1,7 +1,5 @@
 from utils.db import get_db_connection
-
 class ProductModel:
-
     @staticmethod
     def get_all_products():
         conn = get_db_connection()
@@ -106,11 +104,8 @@ class ProductModel:
 
             ProductModel.merge_sort(left_half, sort_key, descending)
             ProductModel.merge_sort(right_half, sort_key, descending)
-
             i = j = k = 0
-
             while i < len(left_half) and j < len(right_half):
-                # handling string matching nicely
                 val_left = left_half[i].get(sort_key)
                 val_right = right_half[j].get(sort_key)
 
@@ -155,8 +150,6 @@ class ProductModel:
         while low <= high:
             mid = (low + high) // 2
             mid_val = str(arr[mid].get(search_key, '')).lower()
-
-            # Using startswith or exact match
             if mid_val == target_val:
                 return arr[mid]
             elif mid_val < target_val:
@@ -164,4 +157,4 @@ class ProductModel:
             else:
                 high = mid - 1
         
-        return None # Not found
+        return None 
