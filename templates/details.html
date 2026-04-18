@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Product Details{% endblock %}
+
+{% block content %}
+<div class="header-section fade-in">
+    <div>
+        <h2 class="page-title">Product Details</h2>
+        <p class="subtitle">Complete overview and history for {{ product.name }}</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('product_bp.index') }}" class="btn-secondary">Back to Dashboard</a>
+        <a href="{{ url_for('product_bp.edit', id=product.id) }}" class="btn-primary" style="margin-left: 8px;">Edit Product</a>
+    </div>
+</div>
+
+<div class="forecast-grid fade-in delay-1" style="margin-bottom: 30px;">
+    <!-- Info Card -->
+    <div class="glass-card">
+        <h3 style="margin-bottom: 20px; color: var(--text-main); border-bottom: 1px solid rgba(226,232,240,0.8); padding-bottom: 10px;">General Info</h3>
+        <p style="margin-bottom: 10px;"><strong style="color: var(--text-muted); display: inline-block; width: 120px;">Code:</strong> #{{ product.id }}</p>
+        <p style="margin-bottom: 10px;"><strong style="color: var(--text-muted); display: inline-block; width: 120px;">Name:</strong> {{ product.name }}</p>
+        <p style="margin-bottom: 10px;"><strong style="color: var(--text-muted); display: inline-block; width: 120px;">Category:</strong> <span class="category-tag">{{ product.category }}</span></p>
+        <p style="margin-bottom: 10px;"><strong style="color: var(--text-muted); display: inline-block; width: 120px;">Price:</strong> <span class="price">₹{{ "{:,.2f}".format(product.price) }}</span></p>
+        <p style="margin-bottom: 10px;"><strong style="color: var(--text-muted); display: inline-block; width: 120px;">Stock Left:</strong> 
+            <span class="quantity-indicator" style="display: inline-flex;">
+                <span class="dot {% if product.quantity < 20 %}dot-danger{% elif product.quantity < 50 %}dot-warning{% else %}dot-success{% endif %}"></span>
+                <span>{{ product.quantity }} Units</span>
+            </span>
+        </p>
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed rgba(226,232,240,0.8);">
+            <strong style="color: var(--text-muted); display: block; margin-bottom: 5px;">Description:</strong>
+            <p>{{ product.description or "No description provided." }}</p>
+        </div>
+    </div>
+
+    <!-- History Card -->
+    <div class="glass-card">
+        <h3 style="margin-bottom: 20px; color: var(--text-main); border-bottom: 1px solid rgba(226,232,240,0.8); padding-bottom: 10px;">Sales History</h3>
+        {% if historical_data %}
+            <div class="table-responsive">
+                <table class="inventory-table" style="font-size: 0.9rem;">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Units Sold</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in historical_data %}
+                        <tr>
+                            <td>{{ record.sale_month }}</td>
+                            <td>{{ record.quantity_sold }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top: 20px; text-align: center;">
+                <a href="{{ url_for('product_bp.predict', id=product.id) }}" class="btn-secondary" style="border-color: var(--ai-color); color: var(--ai-color);">
+                    Generate Demand Forecast ✨
+                </a>
+            </div>
+        {% else %}
+            <div class="empty-state text-center" style="padding: 40px 0 !important;">
+                <div class="empty-icon" style="font-size: 2rem;">📉</div>
+                <p>No sales history recorded.</p>
+                <div style="margin-top: 15px;">
+                    <button class="btn-secondary" disabled title="Not enough data">Demand Forecast Unavailable</button>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
